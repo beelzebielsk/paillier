@@ -16,6 +16,10 @@ LIBS:=ntl gmp m ssl crypto
 LIBFLAGS:=$(addprefix -l, $(LIBS))
 INCLUDES:=include
 INCLUDEFLAGS:=$(addprefix -I, $(INCLUDES))
+TARGETS:= main hello_world parser-example parser rms-parser
+
+.PHONY : all clean
+all : $(TARGETS)
 
 main : main.cpp paillier.cpp
 	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS)
@@ -25,3 +29,12 @@ hello_world : hello_world.cpp
 
 parser-example : parser-example.cpp
 	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
+
+parser : parser.cpp
+	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
+
+rms-parser : rms-parser.cpp
+	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
+
+clean :
+	rm $(TARGETS)
