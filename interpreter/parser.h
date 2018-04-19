@@ -1,67 +1,42 @@
-#include <fstream>
+#ifndef PAILLIER_INTERPRETER_H
+#define PAILLIER_INTERPRETER_H
+
 #include <ctype.h>
 // tolower function.
 #include <vector>
 #include <unordered_map>
+#include <istream>
 
 using std::string;
 using std::vector;
-using std::ifstream;
+using std::istream;
 
 typedef string Token;
-typedef string Value;
+// TODO: change what value applies to. Value should probably be NTL
+// numbers, since that's what we'll be operating on.
+typedef long long int Value;
 typedef std::unordered_map<string, Value> ProgramState;
 
-void tolower(string& str) {
-    for (int i = 0; i < str.length(); i++) {
-        str[i] = tolower(str[i]);
-    }
-}
+/* Mutates the argument string such that all letters are lowercase.
+ *
+ * Parameters
+ * ==========
+ * str, string& : String to lowercase.
+ */
+void tolower(string&);
 
-class Instruction {
-    public:
-        Instruction(string instruction, string op1, string op2, string op3 = "")
-            : operand1(op1), operand2(op2), operand3(op3) {
-                InstructionType type = whichInstruction(instruction);
-                if (type == InstructionType::invalid) {
-                    throw 0;
-                }
-                this->type = type;
-        }
-        enum class InstructionType {
-            // The invalid instruction type is for reporting a string
-            // that is not an instruction.
-            add, multiply, load, output, invalid
-        };
-        static bool isInstructionName(string str) {
-            tolower(str);
-            return str == "add" || 
-                str == "mult" ||
-                str == "load" ||
-                str == "output";
-        }
-        static InstructionType whichInstruction(string str) {
-            tolower(str);
-            if (str == "add") {
-                return InstructionType::add;
-            } else if (str == "mult") {
-                return InstructionType::multiply;
-            } else if (str == "load") {
-                return InstructionType::load;
-            } else if (str == "output") {
-                return InstructionType::output;
-            } else {
-                return InstructionType::invalid;
-            }
-        }
-        InstructionType type;
-        string operand1;
-        // Not all instructions use the 2nd operand.
-        string operand2;
-        string operand3;
-};
-
-class InterpreterError {};
+/* Tests if a character is inside of a string.
+ * Parameters
+ * ==========
+ * str, string : String to test against.
+ * c, char : Character to test for.
+ *
+ * Returns
+ * =======
+ * inString, bool : True if c is a character in str, and false
+ *      otherwise.
+ */
+bool inString(string, char);
 
 /* Returns true if the string content of a token contains the string
  * "string".
@@ -78,9 +53,93 @@ class InterpreterError {};
  * =======
  * isContained, bool : True if str is contained in the token's value.
  */
-bool tokenContains(Token token, string str) {
-    return token == str;
-}
+bool tokenContains(Token, string);
+
+class InterpreterError {};
+
+/* Instructions:
+ * The operands to all of the operations are identifiers.
+ * - add: destination addend addend. Take the two addends and add them
+ *   together, placing the result in the destination. More
+ *   technically, the addends are identifiers. We add the values bound
+ *   to the identifiers of the addends, add them together, and bind
+ *   the result to the destination identifier.
+ * - mult: destination factor factor. Take the two factors and
+ *   multiply them together, placing the result in the destination.
+ * - load: destination value. destination and value are identifiers.
+ *   Take the value bound to the `value` identifier, and bind that
+ *   value to the `destination` identifier.
+ * - output: ?
+ */
+class Instruction {
+    public:
+        Instruction(string instruction, string op1, 
+                    string op2, string op3 = "")
+                    : operand1(op1), operand2(op2), operand3(op3) {
+            Type type = which(instruction);
+            if (type == Type::invalid) {
+                throw InterpreterError();
+            }
+            this->type = type;
+        }
+        enum class Type {
+            /* The invalid instruction type is for reporting a string
+             * that is not an instruction.
+             * It is not meant for use outside of this class. It
+             * should be considered private.
+             */
+            add, mult, load, output, invalid
+        };
+
+        static const Type add    = Type::add;
+        static const Type mult   = Type::mult;
+        static const Type load   = Type::load;
+        static const Type output = Type::output;
+
+        static bool isInstructionName(string str) {
+            tolower(str);
+            return str == "add" || 
+                str == "mult" ||
+                str == "load" ||
+                str == "output";
+        }
+        static Type which(string);
+        Type type;
+        string operand1;
+        string operand2;
+        // Not all instructions use the 3rd operand.
+        string operand3;
+};
+
+class Declaration {
+    public:
+        enum class Type {
+            input, share, invalid
+        };
+        static const Type input   = Type::input;
+        static const Type share   = Type::share;
+        static const Type invalid = Type::invalid;
+
+        string identifierName;
+        Type type;
+
+        Declaration(string type, string name) 
+                : identifierName(name) {
+            Type declarationType = which(type);
+            if (declarationType == Type::invalid) {
+                throw InterpreterError();
+            }
+            this->type = declarationType;
+        }
+
+        static Type which(string);
+        static bool isDeclarationType(string type) {
+            tolower(type);
+            return type == "input" || type == "share"; 
+        }
+
+};
+
 
 /* We're going to need:
  * - Separate the words in a textfile into a list of words, separated
@@ -97,26 +156,20 @@ bool tokenContains(Token token, string str) {
  *   locations to values, that will be generated during execution),
  *   and it will evaluate the program.
  */
-vector<Token> tokenizeProgram(string filename) {
-    ifstream file(filename);
-    vector<Token> tokens;
-    char currentCharacter = '\0';
-    string currentWord = "";
-    string whitespace = " \t\n\r";
-    while (file.get(currentCharacter)) {
-        if (whitespace.find_first_of(currentCharacter)) {
-            if (currentWord == "") continue;
-            if (isInstructionName(currentWord)) {
-                tolower(currentWord);
-            }
-            tokens.push_back(Token(currentWord));
-            currentWord = "";
-        } else {
-            currentWord += currentCharacter;
-        }
-    }
-    return tokens;
-}
+
+/* Takes a stream, which represents an RMS file, and produces a list
+ * of tokens from the file. The list of tokens will be consumed by
+ * parsing functions.
+ *
+ * Parameters
+ * ==========
+ * file, istream& : The file to tokenize.
+ *
+ * Returns
+ * =======
+ * tokens, vector<Token> : The tokens from the file.
+ */
+vector<Token> tokenizeProgram(istream& file);
 
 /* This takes a list of tokens and produces a list of machine-readable
  * instructions. This is here because I think that the execution of a
@@ -136,86 +189,25 @@ vector<Token> tokenizeProgram(string filename) {
  * instructions, vector<Instruction> : A list of machine-readable
  *      instructions.
  */
-vector<Instruction> createInstructionList(vector<Token> tokens) {
-    vector<Instruction> instructions;
-    int i = 0;
-    while(i < tokens.size()) {
-        Token current = tokens[i];
-        if (current == "add" || current == "mult") {
-            // TODO: If there are not two more tokens, throw an error.
-            Token destination = tokens[i+1];
-            Token op1 = tokens[i+2];
-            Token op2 = tokens[i+3];
-            instructions.push_back(
-                    Instruction(current, destination, op1, op2));
-            i += 4;
-        } else if (current == "load" || current == "store") {
-            // TODO: If there is not one more token throw an error.
-            Token destination = tokens[i+1];
-            Token op = tokens[i+2];
-            instructions.push_back(
-                    Instruction(current, destination, op));
-            i += 3;
-        } else {
-            throw InterpreterError();
-        }
-    }
-}
+vector<Instruction> createInstructionList(vector<Token> tokens);
 
 /* Takes a list of instructions, executes those instructions on some
  * initial program state, and then returns the final program state.
  *
  * Parameters
  * ==========
+ * instructions, vector<Instruction> : The list of instructions to
+ *      execute.
+ * initialState, ProgramState : The initial state of the program. It
+ *      contains keys for the identifiers that were declared at the
+ *      beginning of the program, and values are bound to that
+ *      identifier based on the values transmitted from the client to
+ *      the server executing this program.
  * Returns
  * =======
+ * finalState, ProgramState : The final state of the program.
  */
 ProgramState execute(vector<Instruction> instructions,
-                     ProgramState initialState) {
-    /* - Create initial program state. How do you place the inputs in
-     *   the initial program state? Should we create and pass in an
-     *   initial state from elsewhere? Should the language contain
-     *   facilities for specifying the initial state, attaching names
-     *   to inputs? Might that reveal something? How would the
-     *   language provide that?
-     *   - The initial program state should consist of the inputs that
-     *     all parties receive, and the shares where each party
-     *     receives only one.
-     *   - Already, we can see that we have to handle some stuff
-     *     outside of the program text. We can't deliver different
-     *     copies of the program to each party (that would be a shitty
-     *     concern for a person to pay attention to, and I think it
-     *     would ruin the point. The language and library should keep
-     *     track of that concern entirely).
-     *   - The easiest solution that would definitely work no matter
-     *     what we do is to just transmit the names and values of the
-     *     inputs and shares separately. The client part of the
-     *     software could just build the two different payloads for
-     *     the two different parties (the inputs and the shares).
-     *   - We can also treat names as a sort of syntactic sugar. All
-     *     the identifiers are numbers, the names get turned into
-     *     numbers, just in case somehow using human-readable names
-     *     leaks something, somehow.
-     *   - We need a hybrid of the two. The values themselves should
-     *     not be part of the program, especially because the program
-     *     and the program's inputs are not the same thing. However,
-     *     the user needs a way of attaching names to inputs and
-     *     shares. So I think that we need to add declarations of
-     *     shares and inputs to the start of the program, as a header.
-     * - The program state pairs names (locations) to values.
-     *   Operating on the program state means trnsforming names from
-     *   the program to the values the correspond to the names from
-     *   the program state.
-     * - When all the instructions are finished, return the program
-     *   state. Then, we can do whatever transmission logic is needed
-     *   with the program outputs to the correct parties.
-     * - This is sort of like the scheme interpreter you built. The
-     *   nice thing about the scheme interpreter is that the input to
-     *   the interpreter was already machine-readable. This is the
-     *   function that does the machine readable stuff. So all you
-     *   really have to make is instruction-to-action, since the
-     *   entire language is 4 primitives (maybe more for starting
-     *   definitions).
-     */
-    return ProgramState();
-}
+                     ProgramState initialState);
+
+#endif
