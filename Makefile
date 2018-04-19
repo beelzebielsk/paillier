@@ -27,14 +27,5 @@ main : main.cpp paillier.cpp
 hello_world : hello_world.cpp
 	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
 
-parser-example : parser-example.cpp
-	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
-
-parser : parser.cpp
-	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
-
-rms-parser : rms-parser.cpp
-	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
-
 clean :
 	rm $(TARGETS)
