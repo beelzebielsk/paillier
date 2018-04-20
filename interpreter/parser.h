@@ -2,14 +2,17 @@
 #define PAILLIER_INTERPRETER_H
 
 #include <ctype.h>
-// tolower function.
+    // tolower
 #include <vector>
+    using std::vector;
 #include <unordered_map>
 #include <istream>
+    using std::istream;
+#include <ostream>
+    using std::ostream;
+#include <exception>
 
 using std::string;
-using std::vector;
-using std::istream;
 
 typedef string Token;
 // TODO: change what value applies to. Value should probably be NTL
@@ -55,7 +58,24 @@ bool inString(string, char);
  */
 bool tokenContains(Token, string);
 
-class InterpreterError {};
+struct InterpreterError : std::exception {
+    string message;
+    InterpreterError(string msg) : message(msg) {};
+    InterpreterError() : message("Error!") {};
+    friend ostream& operator<<(ostream& out, InterpreterError e) {
+        out << e.what();
+        return out;
+    }
+    const char * what() const noexcept {
+        return message.c_str();
+    }
+    /*
+    ~InterpreterError() {
+        delete &message;
+    }
+    */
+
+};
 
 /* Instructions:
  * The operands to all of the operations are identifiers.
@@ -74,11 +94,11 @@ class InterpreterError {};
 class Instruction {
     public:
         Instruction(string instruction, string op1, 
-                    string op2, string op3 = "")
+                    string op2 = "", string op3 = "")
                     : operand1(op1), operand2(op2), operand3(op3) {
             Type type = which(instruction);
             if (type == Type::invalid) {
-                throw InterpreterError();
+                throw InterpreterError("Invalid instruction name.");
             }
             this->type = type;
         }
@@ -109,6 +129,38 @@ class Instruction {
         string operand2;
         // Not all instructions use the 3rd operand.
         string operand3;
+
+        friend bool operator==(
+                const Instruction i1, const Instruction i2) {
+            i1.type == i2.type &&
+            i1.operand1 == i2.operand1 &&
+            i1.operand2 == i2.operand2 &&
+            i1.operand3 == i2.operand3;
+        }
+    friend std::ostream& operator<<(std::ostream& out, Type type) {
+        if (type == Instruction::add) {
+            out << "Instruction::add";
+        } else if (type == Instruction::mult) {
+            out << "Instruction::mult";
+        } else if (type == Instruction::load) {
+            out << "Instruction::load";
+        } else if (type == Instruction::output) {
+            out << "Instruction::output";
+        }
+        return out;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out,
+            Instruction i) {
+        out << "["
+            << i.type
+            << ", "
+            << i.operand1;
+        if (i.operand2 != "") out << ", " << i.operand2;
+        if (i.operand3 != "") out << ", " << i.operand3;
+        out << "]";
+        return out;
+    }
 };
 
 class Declaration {
@@ -127,7 +179,7 @@ class Declaration {
                 : identifierName(name) {
             Type declarationType = which(type);
             if (declarationType == Type::invalid) {
-                throw InterpreterError();
+                throw InterpreterError("Invalid Declaration type.");
             }
             this->type = declarationType;
         }
@@ -137,8 +189,17 @@ class Declaration {
             tolower(type);
             return type == "input" || type == "share"; 
         }
+    friend std::ostream& operator<<(std::ostream& out, Type type) {
+        if (type == Declaration::input) {
+            out << "Declaration::input";
+        } else if (type == Declaration::share) {
+            out << "Declaration::share";
+        }
+        return out;
+    }
 
 };
+
 
 
 /* We're going to need:

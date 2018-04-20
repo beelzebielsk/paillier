@@ -1,4 +1,6 @@
 #include "parser.h"
+#include <sstream>
+    using std::stringstream;
 #include <iostream>
 
 void tolower(string& str) {
@@ -58,6 +60,8 @@ vector<Token> tokenizeProgram(istream& file) {
             currentWord += currentCharacter;
         }
     }
+    // File may not end in whitespace.
+    if (currentWord != "") tokens.push_back(Token(currentWord));
     return tokens;
 }
 
@@ -74,7 +78,7 @@ vector<Instruction> createInstructionList(vector<Token> tokens) {
             instructions.push_back(
                     Instruction(current, destination, op1, op2));
             i += 4;
-        } else if (current == "load" || current == "store") {
+        } else if (current == "load" || current == "output") {
             // TODO: If there is not one more token throw an error.
             Token destination = tokens[i+1];
             Token op = tokens[i+2];
@@ -82,9 +86,13 @@ vector<Instruction> createInstructionList(vector<Token> tokens) {
                     Instruction(current, destination, op));
             i += 3;
         } else {
-            throw InterpreterError();
+            stringstream s;
+            s << "Token problem, position " << i 
+                << ", word " << current;
+            throw InterpreterError(s.str());
         }
     }
+    return instructions;
 }
 
 ProgramState execute(vector<Instruction> instructions,
@@ -105,6 +113,8 @@ ProgramState execute(vector<Instruction> instructions,
      */
     for (int i = 0; i < instructions.size(); i++) {
         Instruction current = instructions[i];
+        std::cout << "Instruction " << i << ": " 
+            << current << std::endl;
         if (current.type == Instruction::add) {
             initialState[current.operand1] = 
                 initialState[current.operand2] + 
@@ -117,6 +127,10 @@ ProgramState execute(vector<Instruction> instructions,
             initialState[current.operand1] = 
                 initialState[current.operand2];
         } else if (current.type == Instruction::output) { 
+            stringstream s;
+            s << "Instruction # " << i 
+                << ": output not implemented yet!";
+            throw InterpreterError(s.str());
             // TODO: Figure out how output works.
         }
     }
