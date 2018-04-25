@@ -1,7 +1,6 @@
 #include "parser.h"
 #include <sstream>
     using std::stringstream;
-#include <iostream>
 
 void tolower(string& str) {
     for (int i = 0; i < str.length(); i++) {
@@ -113,8 +112,6 @@ ProgramState execute(vector<Instruction> instructions,
      */
     for (int i = 0; i < instructions.size(); i++) {
         Instruction current = instructions[i];
-        std::cout << "Instruction " << i << ": " 
-            << current << std::endl;
         if (current.type == Instruction::add) {
             initialState[current.operand1] = 
                 initialState[current.operand2] + 
