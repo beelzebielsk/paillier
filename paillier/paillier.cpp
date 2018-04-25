@@ -1,5 +1,8 @@
 #include "paillier.h"
 
+NTL::ZZ seed = (NTL::ZZ)0;
+NTL::SetSeed(seed);
+
 NTL::ZZ generateCoprimeNumber(const NTL::ZZ& n) {
     NTL::ZZ ret;
     while (true) {
@@ -45,10 +48,7 @@ void Paillier::GenPrimePair(NTL::ZZ& p, NTL::ZZ& q,
 
 NTL::ZZ Paillier::encrypt(const NTL::ZZ& message) {
     NTL::ZZ random = generateCoprimeNumber(modulus);
-    NTL::ZZ ciphertext = 
-        NTL::PowerMod(generator, message, modulus * modulus) *
-        NTL::PowerMod(random, modulus, modulus * modulus);
-    return ciphertext % (modulus * modulus);
+    return Paillier::encrypt(message, random);
 }
 
 NTL::ZZ Paillier::encrypt(const NTL::ZZ& message, const NTL::ZZ& random) {
@@ -57,7 +57,6 @@ NTL::ZZ Paillier::encrypt(const NTL::ZZ& message, const NTL::ZZ& random) {
         NTL::PowerMod(random, modulus, modulus * modulus);
     return ciphertext % (modulus * modulus);
 }
-
 
 NTL::ZZ Paillier::decrypt(const NTL::ZZ& ciphertext) {
     /* NOTE: NTL::PowerMod will fail if the first input is too large

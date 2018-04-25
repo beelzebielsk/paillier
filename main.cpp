@@ -5,7 +5,7 @@
 #include <time.h>
 #include <assert.h>
 
-#include "paillier.h"
+#include <paillier.h>
 
 using namespace std;
 using namespace NTL;

@@ -1,3 +1,6 @@
+#ifndef PAILLIER_H
+#define PAILLIER_H
+
 #include <NTL/ZZ.h>
 #include <NTL/ZZ_pXFactoring.h>
 
@@ -75,3 +78,5 @@ class Paillier {
 
     void GenPrimePair(NTL::ZZ& p, NTL::ZZ& q, long keyLength); 
 };
+
+#endif
