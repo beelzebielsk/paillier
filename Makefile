@@ -14,17 +14,14 @@
 #   functions. Why would we need this?
 LIBS:=ntl gmp m ssl crypto
 LIBFLAGS:=$(addprefix -l, $(LIBS))
-INCLUDES:=include
+INCLUDES:=paillier
 INCLUDEFLAGS:=$(addprefix -I, $(INCLUDES))
-TARGETS:= main hello_world parser-example parser rms-parser
+TARGETS:= main
 
 .PHONY : all clean
 all : $(TARGETS)
 
-main : main.cpp paillier.cpp
-	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS)
-
-hello_world : hello_world.cpp
+main : main.cpp paillier/paillier.cpp
 	g++ -g -Wall -Wpedantic $^ -o $@ $(LIBFLAGS) $(INCLUDEFLAGS)
 
 clean :
