@@ -69,12 +69,6 @@ struct InterpreterError : std::exception {
     const char * what() const noexcept {
         return message.c_str();
     }
-    /*
-    ~InterpreterError() {
-        delete &message;
-    }
-    */
-
 };
 
 /* Instructions:
@@ -137,30 +131,31 @@ class Instruction {
             i1.operand2 == i2.operand2 &&
             i1.operand3 == i2.operand3;
         }
-    friend std::ostream& operator<<(std::ostream& out, Type type) {
-        if (type == Instruction::add) {
-            out << "Instruction::add";
-        } else if (type == Instruction::mult) {
-            out << "Instruction::mult";
-        } else if (type == Instruction::load) {
-            out << "Instruction::load";
-        } else if (type == Instruction::output) {
-            out << "Instruction::output";
-        }
-        return out;
-    }
 
-    friend std::ostream& operator<<(std::ostream& out,
-            Instruction i) {
-        out << "["
-            << i.type
-            << ", "
-            << i.operand1;
-        if (i.operand2 != "") out << ", " << i.operand2;
-        if (i.operand3 != "") out << ", " << i.operand3;
-        out << "]";
-        return out;
-    }
+        friend std::ostream& operator<<(std::ostream& out, Type type) {
+            if (type == Instruction::add) {
+                out << "Instruction::add";
+            } else if (type == Instruction::mult) {
+                out << "Instruction::mult";
+            } else if (type == Instruction::load) {
+                out << "Instruction::load";
+            } else if (type == Instruction::output) {
+                out << "Instruction::output";
+            }
+            return out;
+        }
+
+        friend std::ostream& operator<<(std::ostream& out,
+                Instruction i) {
+            out << "["
+                << i.type
+                << ", "
+                << i.operand1;
+            if (i.operand2 != "") out << ", " << i.operand2;
+            if (i.operand3 != "") out << ", " << i.operand3;
+            out << "]";
+            return out;
+        }
 };
 
 class Declaration {
@@ -199,8 +194,6 @@ class Declaration {
     }
 
 };
-
-
 
 /* We're going to need:
  * - Separate the words in a textfile into a list of words, separated
