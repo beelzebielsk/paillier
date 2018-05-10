@@ -9,16 +9,17 @@
 vector<bool> ZZToBits(ZZ number) {
     long numBytes = NumBytes(number);
     unsigned long numBits = numBytes * 8;
-    vector<bool> bits (numBits);
+    vector<bool> bits;
 
-    unsigned char * bytes;
-    unsigned char * bytesEnd = bytes + numBytes;
+    unsigned char * bytes = new unsigned char[numBytes];
     BytesFromZZ(bytes, number, numBytes);
-    for (unsigned char * byte = bytes; byte != bytesEnd; bytes++) {
+    unsigned char * bytesEnd = bytes + numBytes;
+    for (unsigned char * byte = bytes; byte != bytesEnd; byte++) {
         for (int i = 0; i < 8; i++) {
             bits.push_back(((*byte) >> i) & 1);
         }
     }
+    delete bytes;
     return bits;
 }
 
@@ -26,7 +27,7 @@ Input::Input(ZZ value, ZZ key, ZZ modulus)
     : Value(Value::Type::Input), value(value), modulus(modulus)
 {
     vector<bool> keyBits = ZZToBits(key);
-    vector<ZZ> bits (keyBits.size());
+    vector<ZZ> bits;
     for (bool bit : keyBits) {
         bits.push_back(NTL::power(this->value, bit));
     }
