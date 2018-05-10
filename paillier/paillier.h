@@ -2,13 +2,14 @@
 #define PAILLIER_H
 
 #include <NTL/ZZ.h>
-#include <NTL/ZZ_pXFactoring.h>
+#include <vector>
 
 class Paillier {
     public:
     /* Completely generate everything, from scratch */
     Paillier();
     Paillier(const NTL::ZZ& modulus, const NTL::ZZ& lambda); 
+    Paillier(const long keyLength);
     //Paillier(path to public key, path to private key).
 
     /* Paillier encryption function. Takes in a message from the
@@ -40,6 +41,27 @@ class Paillier {
      * NTL:ZZ ciphertext : The encyrpted message.
      */
     NTL::ZZ encrypt(const NTL::ZZ& message, const NTL::ZZ& random); 
+    
+    /* Creates encryptions of each bit of the secret key. The first
+     * encryption is of the least significant bit of the key. You may
+     * specify a message to multiply the bits of the secret key with.
+     * It is the same message for all of the bits of the secret key.
+     *
+     * Parameters
+     * ==========
+     * message optional, NTL::ZZ : A message to pass in to multiply
+     *      each bit of the secret key.
+     *
+     * Returns
+     * =======
+     * encryptedBits, std::vector<NTL::ZZ> : The encrypted bits of the
+     * secret key. Each entry is basically equal to:
+     *      p.encrypt(((p.lambda >> (bit - 1)) & 1) * message)
+     * Where p is an object of class Paillier.
+     */
+    std::vector<NTL::ZZ> encryptBits(NTL::ZZ message = NTL::ZZ{1});
+
+    
 
     /* Paillier decryption function. Takes in a cipertext from Z mod
      * n**2 and returns a message in the Z mod n.
@@ -53,6 +75,9 @@ class Paillier {
      * NTL::ZZ message : The original message.
      */
     NTL::ZZ decrypt(const NTL::ZZ& ciphertext); 
+
+    NTL::ZZ getModulus() { return modulus; }
+    NTL::ZZ getGenerator() { return generator; }
 
     private:
     /* modulus = pq, where p and q are primes */

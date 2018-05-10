@@ -1,7 +1,9 @@
 #include "paillier.h"
+#include <vector>
+#include <iostream>
 
 NTL::ZZ seed = (NTL::ZZ)0;
-NTL::SetSeed(seed);
+//NTL::SetSeed(seed);
 
 NTL::ZZ generateCoprimeNumber(const NTL::ZZ& n) {
     NTL::ZZ ret;
@@ -11,9 +13,28 @@ NTL::ZZ generateCoprimeNumber(const NTL::ZZ& n) {
     }
 }
 
+std::vector<bool> ZZToBits(NTL::ZZ number) {
+    long numBytes = NumBytes(number);
+    std::vector<bool> bits;
+
+    unsigned char * bytes = new unsigned char[numBytes];
+    BytesFromZZ(bytes, number, numBytes);
+    unsigned char * bytesEnd = bytes + numBytes;
+    for (unsigned char * byte = bytes; byte != bytesEnd; byte++) {
+        for (int i = 0; i < 8; i++) {
+            bits.push_back(((*byte) >> i) & 1);
+        }
+    }
+    delete bytes;
+    return bits;
+}
+
+
 Paillier::Paillier() {
-    /* Length in bits. */
-    long keyLength = 512;
+    Paillier(512);
+}
+
+Paillier::Paillier(const long keyLength) {
     NTL::ZZ p, q;
     GenPrimePair(p, q, keyLength);
     modulus = p * q;
@@ -31,14 +52,16 @@ Paillier::Paillier(const NTL::ZZ& modulus, const NTL::ZZ& lambda) {
     lambdaInverse = NTL::InvMod(this->lambda, this->modulus);
 }
 
+
 void Paillier::GenPrimePair(NTL::ZZ& p, NTL::ZZ& q,
                                long keyLength) {
+    long err = 80;
+    long primeLength = keyLength/2;
     while (true) {
-        long err = 80;
-        p = NTL::GenPrime_ZZ(keyLength/2, err); 
-        NTL::ZZ q = NTL::GenPrime_ZZ(keyLength/2, err);
-        while (p != q) {
-            q = NTL::GenPrime_ZZ(keyLength/2, err);
+        p = NTL::GenPrime_ZZ(primeLength, err); 
+        q = NTL::GenPrime_ZZ(primeLength, err);
+        while (p == q) {
+            q = NTL::GenPrime_ZZ(primeLength, err);
         }
         NTL::ZZ n = p * q;
         NTL::ZZ phi = (p - 1) * (q - 1);
@@ -56,6 +79,15 @@ NTL::ZZ Paillier::encrypt(const NTL::ZZ& message, const NTL::ZZ& random) {
         NTL::PowerMod(generator, message, modulus * modulus) *
         NTL::PowerMod(random, modulus, modulus * modulus);
     return ciphertext % (modulus * modulus);
+}
+
+std::vector<NTL::ZZ> Paillier::encryptBits(NTL::ZZ message) {
+    std::vector<bool> keyBits = ZZToBits(lambda);
+    std::vector<NTL::ZZ> bits;
+    for (bool bit : keyBits) {
+        bits.push_back(NTL::power(message, bit));
+    }
+    return bits;
 }
 
 NTL::ZZ Paillier::decrypt(const NTL::ZZ& ciphertext) {
