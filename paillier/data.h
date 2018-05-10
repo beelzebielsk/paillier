@@ -1,8 +1,8 @@
-#include <NTL/ZZ.h>
-#include <vector>
-
 #ifndef DATA_H
 #define DATA_H
+
+#include <NTL/ZZ.h>
+#include <vector>
 
 class Value {
     public:
