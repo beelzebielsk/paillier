@@ -6,22 +6,6 @@
 #include <exception>
     using std::exception;
 
-vector<bool> ZZToBits(ZZ number) {
-    long numBytes = NumBytes(number);
-    unsigned long numBits = numBytes * 8;
-    vector<bool> bits;
-
-    unsigned char * bytes = new unsigned char[numBytes];
-    BytesFromZZ(bytes, number, numBytes);
-    unsigned char * bytesEnd = bytes + numBytes;
-    for (unsigned char * byte = bytes; byte != bytesEnd; byte++) {
-        for (int i = 0; i < 8; i++) {
-            bits.push_back(((*byte) >> i) & 1);
-        }
-    }
-    delete bytes;
-    return bits;
-}
 
 Input::Input(ZZ value, ZZ key, ZZ modulus) 
     : Value(Value::Type::Input), value(value), modulus(modulus)
@@ -33,6 +17,7 @@ Input::Input(ZZ value, ZZ key, ZZ modulus)
     }
     this->bits = bits;
 }
+#include "utility.h"
 
 Input::Input(ZZ value, vector<ZZ> bits, ZZ modulus) 
     : Value(Value::Type::Input), value(value), modulus(modulus) {}

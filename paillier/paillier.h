@@ -100,8 +100,6 @@ class Paillier {
      * NTL::ZZ result : (x - 1) / n
      */
     NTL::ZZ L_function(const NTL::ZZ& n) { return (n - 1) / modulus; }
-
-    void GenPrimePair(NTL::ZZ& p, NTL::ZZ& q, long keyLength); 
 };
 
 #endif
