@@ -6,17 +6,6 @@
 #include <exception>
     using std::exception;
 
-
-Input::Input(ZZ value, ZZ key, ZZ modulus) 
-    : Value(Value::Type::Input), value(value), modulus(modulus)
-{
-    vector<bool> keyBits = ZZToBits(key);
-    vector<ZZ> bits;
-    for (bool bit : keyBits) {
-        bits.push_back(NTL::power(this->value, bit));
-    }
-    this->bits = bits;
-}
 #include "utility.h"
 
 Input::Input(ZZ value, vector<ZZ> bits, ZZ modulus) 
@@ -39,13 +28,14 @@ Memory::Memory(ZZ value, ZZ secret)
  *      result.value raised to the value of a single bit from the
  *      encryption key.
  */
-Input operator+(Input a, Input b) {
-    ZZ value = a.value * b.value;
-    vector<ZZ> bits (a.bits.size());
-    for (long i = 0; i < a.bits.size(); i++) {
-        bits.push_back(a.bits[i] * b.bits[i]);
+Input Input::operator+(Input op) {
+    ZZ opMod = this->modulus * this->modulus;
+    ZZ value = (this->value * op.value) % opMod;
+    vector<ZZ> bits;
+    for (long i = 0; i < bits.size(); i++) {
+        bits.push_back((this->bits[i] * op.bits[i]) % opMod);
     }
-    return Input(value, bits, a.modulus);
+    return Input(value, bits, modulus);
 }
 
 Memory operator+(Memory a, Memory b) {

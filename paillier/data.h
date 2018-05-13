@@ -20,11 +20,17 @@ class Input : public Value {
     // I'm putting this here because use of any modulus other than the
     // correct modulus is wrong. The results will be wrong. You should
     // not be free to pass in whatever modulus you want to pass in.
+    // Inputs should be used with one modulus only.
+    // Even this seems incorrect. There should be one modulus for a
+    // family of inputs. There's no correct thing to do when combining
+    // inputs with different moduli.
+    // Their... "context" is what should have the modulus. Some sort
+    // of RMS instruction executor.
     NTL::ZZ modulus;
     std::vector<NTL::ZZ> bits;
 
-    Input(NTL::ZZ value, NTL::ZZ key, NTL::ZZ modulus);
     Input(NTL::ZZ value, std::vector<NTL::ZZ> bits, NTL::ZZ modulus);
+    Input operator+(Input op);
     virtual void add(Value& destination, const Value& operand); 
     virtual void multiply(Value& destination, const Value& operand); 
 };
