@@ -8,6 +8,8 @@
 
 #include "utility.h"
 
+#include "ddlog.h"
+
 Input::Input(ZZ value, vector<ZZ> bits, ZZ modulus) 
     : Value(Value::Type::Input), value(value), modulus(modulus) {}
 
@@ -58,14 +60,26 @@ Memory operator+(Memory a, Memory b) {
  * =======
  * share, ZZ : Returns a single share of a value.
  */
-ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus) {
-    // First, go for the multiplicative share.
+ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus, bool server) {
+    // Let server = false be server 1
+	// Let server = true be server 2
+	
+	// First, go for the multiplicative share.
     ZZ multShare = NTL::PowerMod(encryption, mem.secret, modulus);
     // Then use DDLOG to transform to the additive share.
+    
+	// k is steps for server to reach a special point
+	ZZ k;
 
-    throw exception();
-    // TODO: Finish this
-    return ZZ(0);
+	// Check which server we're working wih and apply DDLOG
+	if(!server){
+		k = -1 * DDLog::getStepsA(multShare, modulus + 1, modulus);
+	}
+	else{
+		k = DDLog::getStepsB(multShare, modulus + 1, modulus);
+	}
+
+    return k;
 }
 
 /* Multiplication of a memory location and an input. Consists of
