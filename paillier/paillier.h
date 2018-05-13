@@ -8,8 +8,8 @@ class Paillier {
     public:
     /* Completely generate everything, from scratch */
     Paillier();
-    Paillier(const NTL::ZZ& modulus, const NTL::ZZ& lambda); 
     Paillier(const long keyLength);
+    Paillier(const NTL::ZZ& modulus, const NTL::ZZ& lambda); 
     //Paillier(path to public key, path to private key).
 
     /* Paillier encryption function. Takes in a message from the
@@ -59,9 +59,7 @@ class Paillier {
      *      p.encrypt(((p.lambda >> (bit - 1)) & 1) * message)
      * Where p is an object of class Paillier.
      */
-    std::vector<NTL::ZZ> encryptBits(NTL::ZZ message = NTL::ZZ{1});
-
-    
+    std::vector<NTL::ZZ> encryptBits(NTL::ZZ message = NTL::ZZ(1));
 
     /* Paillier decryption function. Takes in a cipertext from Z mod
      * n**2 and returns a message in the Z mod n.

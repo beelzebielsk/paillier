@@ -6,11 +6,7 @@
 NTL::ZZ seed = (NTL::ZZ)0;
 //NTL::SetSeed(seed);
 
-
-
-Paillier::Paillier() {
-    Paillier(512);
-}
+Paillier::Paillier() : Paillier(512) {}
 
 Paillier::Paillier(const long keyLength) {
     NTL::ZZ p, q;
@@ -18,7 +14,7 @@ Paillier::Paillier(const long keyLength) {
     modulus = p * q;
     generator = modulus + 1;
     NTL::ZZ phi = (p - 1) * (q - 1);
-    // LCM(p, q) = p * q / GCD(p, q);
+    // LCM(a, b) = a * b / GCD(a, b);
     lambda = phi / NTL::GCD(p - 1, q - 1);
     lambdaInverse = NTL::InvMod(lambda, modulus);
 }
@@ -46,7 +42,7 @@ std::vector<NTL::ZZ> Paillier::encryptBits(NTL::ZZ message) {
     std::vector<bool> keyBits = ZZToBits(lambda);
     std::vector<NTL::ZZ> bits;
     for (bool bit : keyBits) {
-        bits.push_back(NTL::power(message, bit));
+        bits.push_back(this->encrypt(bit * message));
     }
     return bits;
 }
