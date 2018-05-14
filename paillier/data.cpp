@@ -3,6 +3,7 @@
     using std::vector;
     using NTL::BytesFromZZ;
     using NTL::NumBytes;
+    using NTL::InvMod;
 #include <exception>
     using std::exception;
 
@@ -11,7 +12,8 @@
 #include "ddlog.h"
 
 Input::Input(ZZ value, vector<ZZ> bits, ZZ modulus) 
-    : Value(Value::Type::Input), value(value), modulus(modulus) {}
+    : Value(Value::Type::Input), value(value), bits(bits),
+    modulus(modulus) {}
 
 Memory::Memory(ZZ value, ZZ secret)
     : Value(Value::Type::Memory), value(value), secret(secret) {}
@@ -38,6 +40,15 @@ Input Input::operator+(Input op) {
         bits.push_back((this->bits[i] * op.bits[i]) % opMod);
     }
     return Input(value, bits, modulus);
+}
+
+Input Input::operator-() {
+    ZZ newValue = InvMod(value, modulus * modulus);
+    vector<ZZ> newBits;
+    for (ZZ bit : bits) {
+        newBits.push_back(InvMod(bit, modulus * modulus));
+    }
+    return Input(newValue, newBits, modulus);
 }
 
 Memory operator+(Memory a, Memory b) {

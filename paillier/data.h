@@ -31,6 +31,7 @@ class Input : public Value {
 
     Input(NTL::ZZ value, std::vector<NTL::ZZ> bits, NTL::ZZ modulus);
     Input operator+(Input op);
+    Input operator-();
     virtual void add(Value& destination, const Value& operand); 
     virtual void multiply(Value& destination, const Value& operand); 
 };
