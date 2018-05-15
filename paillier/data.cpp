@@ -8,7 +8,6 @@
     using std::exception;
 
 #include "utility.h"
-
 #include "ddlog.h"
 
 Input::Input(ZZ value, vector<ZZ> bits, ZZ modulus) 
@@ -192,4 +191,24 @@ void Memory::multiply(Value& destination, const Value& operand) {
         Input intermediate = dynamic_cast<const Input&>(operand);
         destination = multMemoryInput(intermediate, *this);
     } else throw exception();
+
+std::pair<ZZ, ZZ> share(ZZ number, ZZ modulus) {
+    // Generate number in [-modulus ** 3, modulus ** 3].
+    // - modulus = 2
+    // - cube = 8
+    // - range is [-8, 8]
+    // - number is in [0, 3]
+    // - number is 3:
+    //     - if number is three, then -8, -7, -6 cannot be shares.
+    //       They're too low, no other share can add with them to get
+    //       3.
+    
+    // This is a safe assumption. The actual shared numbers ought to
+    // be smaller than M, and M ought to be MUCH smaller than n ** 2,
+    // since there should be many special points in Z/Zn**2.
+    NTL::ZZ normalizedNum = number % (modulus * modulus);
+    NTL::ZZ cube = NTL::power(modulus, 3);
+    NTL::ZZ share1 = RandomInRange(-cube + number, cube);
+    NTL::ZZ share2 = number - share1;
+    return std::pair<ZZ, ZZ>{share1, share2};
 }

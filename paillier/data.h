@@ -49,4 +49,20 @@ class Memory : public Value {
     virtual void multiply(Value& destination, const Value& operand); 
 };
 
+NTL::ZZ multMemoryEncryption(NTL::ZZ encryption, Memory mem, 
+                             NTL::ZZ modulus, bool server);
+/* Converts a number into two additive shares, a and b, such that a +
+ * b = number.
+ *
+ * Parameters
+ * ==========
+ * number, ZZ : Number to split into shares. Must be in the range: 
+ *      [0, modulus ** 2].
+ * modulus, ZZ : The modulus of a related paillier cryptosystem.
+ *
+ * Returns
+ * =======
+ * 
+ */
+std::pair<NTL::ZZ, NTL::ZZ> share(NTL::ZZ number, NTL::ZZ modulus);
 #endif
