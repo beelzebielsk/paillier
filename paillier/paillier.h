@@ -76,13 +76,13 @@ class Paillier {
 
     NTL::ZZ getModulus() { return modulus; }
     NTL::ZZ getGenerator() { return generator; }
+    NTL::ZZ getLambda() { return lambda; }
 
     private:
     /* modulus = pq, where p and q are primes */
     NTL::ZZ modulus;
     NTL::ZZ generator;
     NTL::ZZ lambda;
-    NTL::ZZ lambdaInverse;
 
     /* The L function in the paillier cryptosystem.  See
      * <https://en.wikipedia.org/wiki/Paillier_cryptosystem> for more

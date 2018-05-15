@@ -14,20 +14,25 @@ Paillier::Paillier(const long keyLength) {
     modulus = p * q;
     generator = modulus + 1;
     NTL::ZZ phi = (p - 1) * (q - 1);
-    // LCM(a, b) = a * b / GCD(a, b);
-    lambda = phi / NTL::GCD(p - 1, q - 1);
-    lambdaInverse = NTL::InvMod(lambda, modulus);
+
+    lambda = (NTL::ZZ)0;
+    NTL::CRT(lambda, phi, (NTL::ZZ)1, modulus);
+    phi = (p - 1) * (q - 1);
+    modulus = p * q;
+    // NTL returns values that may be negative. lambda is obtained via
+    // the CRT. It's a number that is calculated modulo (modulus *
+    // phi).
+    lambda = lambda % (modulus * phi);
 }
 
 Paillier::Paillier(const NTL::ZZ& modulus, const NTL::ZZ& lambda) {
     this->modulus = modulus;
     generator = this->modulus + 1;
     this->lambda = lambda;
-    lambdaInverse = NTL::InvMod(this->lambda, this->modulus);
 }
 
 NTL::ZZ Paillier::encrypt(const NTL::ZZ& message) {
-    NTL::ZZ random = generateCoprimeNumber(modulus);
+    NTL::ZZ random = generateCoprimeNumber(modulus * modulus);
     return Paillier::encrypt(message, random);
 }
 
@@ -51,8 +56,9 @@ NTL::ZZ Paillier::decrypt(const NTL::ZZ& ciphertext) {
     /* NOTE: NTL::PowerMod will fail if the first input is too large
      * (which I assume means larger than modulus).
      */
+
     NTL::ZZ deMasked = NTL::PowerMod(
             ciphertext, lambda, modulus * modulus);
     NTL::ZZ power = L_function(deMasked);
-    return (power * lambdaInverse) % modulus;
+    return power % modulus;
 }
