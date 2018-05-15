@@ -91,4 +91,24 @@ NTL::ZZ multMemoryEncryption(NTL::ZZ encryption, Memory mem,
  * 
  */
 std::pair<NTL::ZZ, NTL::ZZ> share(NTL::ZZ number, NTL::ZZ modulus);
+
+/* Multiplication of a memory location and an input. Consists of
+ * multiplying the memory location with the input's value, and also
+ * with all of the encrypted bits of the input. The encrypted bits are
+ * used to reconstruct a sharing invovling lambda, the secret key of
+ * the paillier cryptosystem.
+ *
+ * Parameters
+ * ==========
+ * i, Input : The input the multiply.
+ * mem, Memory : The memory location to multiply.
+ *
+ * Returns
+ * =======
+ * result, Memory : A memory location which describes one additive
+ *      share of the multiplication of the encrypted value of the
+ *      input and the full number that the shares in `mem` correspond
+ *      to.
+ */
+Memory multMemoryInput(Input i, Memory mem, bool serverIdentity);
 #endif

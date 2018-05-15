@@ -96,21 +96,18 @@ ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus,
  *      input and the full number that the shares in `mem` correspond
  *      to.
  */
-Memory multMemoryInput(Input i, Memory mem) {
-    /*
-    ZZ value = multMemoryEncryption(i.value, mem, i.modulus);
+Memory multMemoryInput(Input i, Memory mem, bool serverIdentity) {
+    ZZ value = multMemoryEncryption(
+            i.value, mem, i.modulus, serverIdentity);
     ZZ secret;
     long power2 = 0;
     for (ZZ bit : i.bits) {
-        ZZ share = multMemoryEncryption(bit, mem, i.modulus);
+        ZZ share = multMemoryEncryption(
+                bit, mem, i.modulus, serverIdentity);
         secret += share << power2;
         ++power2;
     }
     return Memory(value, secret);
-    */
-    // Not implemented yet.
-    throw exception();
-    return Memory{(ZZ)0, (ZZ)0};
 }
 
 /* The following functions are frontends to the operations of
