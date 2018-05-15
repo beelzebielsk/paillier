@@ -55,41 +55,27 @@ Memory operator+(Memory a, Memory b) {
             a.value + b.value, a.secret + b.secret);
 }
 
-/* Multiplication of a single memory location with a single encrypted
- * value. Used for performing multiplication of a memory location and
- * an input, since inputs consist of several encrypted values.
- *
- * Parameters
- * ==========
- * encryption, ZZ : An encrypted value using the Paillier
- *      cryptosystem.
- * mem, Memory : The contents of a memory location of an RMS program.
- * modulus, ZZ : The modulus of the paillier cryptosystem with which
- *      `encryption` was encrypted.
- * Returns
- * =======
- * share, ZZ : Returns a single share of a value.
- */
-ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus, bool server) {
+ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus,
+                        bool server) {
     // Let server = false be server 1
-	// Let server = true be server 2
-	
-	// First, go for the multiplicative share.
-    ZZ multShare = NTL::PowerMod(encryption, mem.secret, modulus);
+    // Let server = true be server 2
+
+    ZZ cipherModulus = modulus * modulus;
+    ZZ generator = modulus + 1;
+
+    // First, go for the multiplicative share.
+    ZZ multShare = NTL::PowerMod(encryption, mem.secret, cipherModulus);
     // Then use DDLOG to transform to the additive share.
-    
-	// k is steps for server to reach a special point
-	ZZ k;
 
-	// Check which server we're working wih and apply DDLOG
-	if(!server){
-		k = -1 * DDLog::getStepsA(multShare, modulus + 1, modulus);
-	}
-	else{
-		k = DDLog::getStepsB(multShare, modulus + 1, modulus);
-	}
-
-    return k;
+    // Check which server we're working wih and apply DDLOG
+    if(!server){
+        return (ZZ)(-DDLog::getStepsA(multShare, generator,
+                    cipherModulus));
+    }
+    else {
+        return (ZZ)(DDLog::getStepsB(multShare, generator,
+                    cipherModulus));
+    }
 }
 
 /* Multiplication of a memory location and an input. Consists of

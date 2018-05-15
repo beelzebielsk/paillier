@@ -49,6 +49,32 @@ class Memory : public Value {
     virtual void multiply(Value& destination, const Value& operand); 
 };
 
+/* Multiplies a memory location and an input together. The result is a
+ * the value that should go in m.value for a memory location.
+ * Specifically, if this number is output from and RMS program run on
+ * two different servers, (one for whom serverIdentity = 0, the other
+ * for whom serverIdentity = 1), if the two outputs are summed from
+ * the results run on two different computers, the result should be:
+ *      paillier.decrypt(encryption) * (mem1.value + mem2.value) 
+ * Where mem1 is the argument to mem on this server, and mem2 is the
+ * argument to mem on the other server.
+ *
+ * Parameters
+ * ==========
+ * encryption, ZZ : An encrypted value. Result will be related to the
+ *      product of the encrypted message and the contents of the
+ *      memory location.
+ * mem, Memory : Memory location to perform product with.
+ * modulus, ZZ : The modulus of the paillier object that the
+ *      encryption was encrypted with.
+ * server, bool : Indicates which server the current server is.
+ *      Multiplication works a little differently for the two
+ *      different servers on which an RMS program may be run.
+ * Returns
+ * =======
+ * share, ZZ : Returns a share of the product 
+ *      paillier.decrypt(encryption) * mem.value
+ */
 NTL::ZZ multMemoryEncryption(NTL::ZZ encryption, Memory mem, 
                              NTL::ZZ modulus, bool server);
 /* Converts a number into two additive shares, a and b, such that a +
