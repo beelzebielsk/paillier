@@ -111,6 +111,7 @@ ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus, bool server) {
  *      to.
  */
 Memory multMemoryInput(Input i, Memory mem) {
+    /*
     ZZ value = multMemoryEncryption(i.value, mem, i.modulus);
     ZZ secret;
     long power2 = 0;
@@ -120,6 +121,10 @@ Memory multMemoryInput(Input i, Memory mem) {
         ++power2;
     }
     return Memory(value, secret);
+    */
+    // Not implemented yet.
+    throw exception();
+    return Memory{(ZZ)0, (ZZ)0};
 }
 
 /* The following functions are frontends to the operations of
@@ -139,13 +144,16 @@ Memory multMemoryInput(Input i, Memory mem) {
  *      calculation.
  */
 void Input::add(Value& destination, const Value& operand) {
+    /*
     if (operand.type == Value::Type::Input) {
         //const Input& op = dynamic_cast<const Input&>(operand);
         Input intermediate = dynamic_cast<const Input&>(operand);
         intermediate = *this + intermediate;
         destination = intermediate;
     } else throw exception();
-
+    */
+    // Not implemented yet.
+    throw exception();
 }
 
 /* A frontend to all addition operations that are define on an
@@ -172,11 +180,15 @@ void Memory::add(Value& destination, const Value& operand) {
  * operand, Value & : An operand for multiplication with an input.
  */
 void Input::multiply(Value& destination, const Value& operand) {
+    /*
     if (operand.type == Value::Type::Memory) {
         Memory intermediate = dynamic_cast<const Memory&>(operand);
         intermediate = multMemoryInput(*this, intermediate);
         destination = intermediate;
     } else throw exception();
+    */
+    // Not implemented yet.
+    throw exception();
 }
 
 /* A frontend to all multiplication operations that are define on an
@@ -187,10 +199,15 @@ void Input::multiply(Value& destination, const Value& operand) {
  * operand, Value & : An operand for multiplication with an input.
  */
 void Memory::multiply(Value& destination, const Value& operand) {
+    /*
     if (operand.type == Value::Type::Input) {
         Input intermediate = dynamic_cast<const Input&>(operand);
         destination = multMemoryInput(intermediate, *this);
     } else throw exception();
+    */
+    // Not implemented yet.
+    throw exception();
+}
 
 std::pair<ZZ, ZZ> share(ZZ number, ZZ modulus) {
     // Generate number in [-modulus ** 3, modulus ** 3].
