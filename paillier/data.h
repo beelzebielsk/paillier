@@ -6,6 +6,15 @@
 
 class Value {
     public:
+    /* Which server is running the computations. */
+    static bool serverIdentity;
+    /* The modulus with which the ciphertexts have been encrypted. 
+     * For the paillier cryptosystem, that's n, not n ** 2. */
+    static NTL::ZZ modulus;
+    static void init(bool serverIdentity, NTL::ZZ modulus) {
+        Value::serverIdentity = serverIdentity;
+        Value::modulus = modulus;
+    }
     enum class Type {Input, Memory};
     Type type;
     virtual void add(Value& destination, const Value& operand) = 0;
@@ -30,8 +39,9 @@ class Input : public Value {
     std::vector<NTL::ZZ> bits;
 
     Input(NTL::ZZ value, std::vector<NTL::ZZ> bits, NTL::ZZ modulus);
-    Input operator+(Input op);
+    Input operator+(Input& op);
     Input operator-();
+    Input operator-(Input& op);
     virtual void add(Value& destination, const Value& operand); 
     virtual void multiply(Value& destination, const Value& operand); 
 };
@@ -44,6 +54,7 @@ class Memory : public Value {
      * the memory location. */
     NTL::ZZ secret;
 
+    Memory operator+(Memory& op);
     Memory(NTL::ZZ value, NTL::ZZ secret);
     virtual void add(Value& destination, const Value& operand);
     virtual void multiply(Value& destination, const Value& operand); 
@@ -110,5 +121,24 @@ std::pair<NTL::ZZ, NTL::ZZ> share(NTL::ZZ number, NTL::ZZ modulus);
  *      input and the full number that the shares in `mem` correspond
  *      to.
  */
-Memory multMemoryInput(Input i, Memory mem, bool serverIdentity);
+Memory multMemoryInput(Input i, Memory mem, NTL::ZZ modulus,
+                       bool serverIdentity);
+
+/* Succinct way to perform input/memory multiplications directly.
+ * Requires the Value::init() function to be called, so that the
+ * correct modulus and server identity can be used. Just calls
+ * multMemoryInput with the correct server identity.
+ *
+ * Parameters
+ * ==========
+ * m, Memory : Memory location to multiply the input by.
+ * i, Input : Input to multiply the memory location by.
+ *
+ * Returns
+ * =======
+ * result, Memory : The new memory location returned by the product of
+ *      the input and memory.
+ */
+Memory operator*(Memory& m, Input& i);
+Memory operator*(Input& i, Memory& m);
 #endif

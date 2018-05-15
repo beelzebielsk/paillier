@@ -10,6 +10,9 @@
 #include "utility.h"
 #include "ddlog.h"
 
+bool Value::serverIdentity;
+ZZ Value::modulus;
+
 Input::Input(ZZ value, vector<ZZ> bits, ZZ modulus) 
     : Value(Value::Type::Input), value(value), bits(bits),
     modulus(modulus) {}
@@ -31,8 +34,9 @@ Memory::Memory(ZZ value, ZZ secret)
  *      result.value raised to the value of a single bit from the
  *      encryption key.
  */
-Input Input::operator+(Input op) {
-    ZZ opMod = this->modulus * this->modulus;
+Input Input::operator+(Input& op) {
+    ZZ modulus = Value::modulus;
+    ZZ opMod = modulus * modulus;
     ZZ value = (this->value * op.value) % opMod;
     vector<ZZ> bits;
     for (long i = 0; i < bits.size(); i++) {
@@ -42,6 +46,7 @@ Input Input::operator+(Input op) {
 }
 
 Input Input::operator-() {
+    ZZ modulus = Value::modulus;
     ZZ newValue = InvMod(value, modulus * modulus);
     vector<ZZ> newBits;
     for (ZZ bit : bits) {
@@ -50,9 +55,23 @@ Input Input::operator-() {
     return Input(newValue, newBits, modulus);
 }
 
-Memory operator+(Memory a, Memory b) {
+Input Input::operator-(Input& op) {
+    Input negation = -op;
+    return *this + negation;
+}
+
+Memory Memory::operator+(Memory& op) {
     return Memory(
-            a.value + b.value, a.secret + b.secret);
+            this->value + op.value, this->secret + op.secret);
+}
+
+Memory operator*(Memory& m, Input& i) {
+    return multMemoryInput(i, m, Value::modulus,
+                           Value::serverIdentity);
+}
+
+Memory operator*(Input& i, Memory& m) {
+    return m * i;
 }
 
 ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus,
@@ -96,14 +115,15 @@ ZZ multMemoryEncryption(ZZ encryption, Memory mem, ZZ modulus,
  *      input and the full number that the shares in `mem` correspond
  *      to.
  */
-Memory multMemoryInput(Input i, Memory mem, bool serverIdentity) {
+Memory multMemoryInput(Input i, Memory mem, ZZ modulus, bool
+                       serverIdentity) {
     ZZ value = multMemoryEncryption(
-            i.value, mem, i.modulus, serverIdentity);
+            i.value, mem, modulus, serverIdentity);
     ZZ secret;
     long power2 = 0;
     for (ZZ bit : i.bits) {
         ZZ share = multMemoryEncryption(
-                bit, mem, i.modulus, serverIdentity);
+                bit, mem, modulus, serverIdentity);
         secret += share << power2;
         ++power2;
     }
