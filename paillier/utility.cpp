@@ -39,3 +39,10 @@ void GenPrimePair(NTL::ZZ& p, NTL::ZZ& q, long keyLength) {
         if (NTL::GCD(n, phi) == 1) return;
     }
 }
+
+NTL::ZZ RandomInRange(NTL::ZZ min, NTL::ZZ max) {
+    NTL::ZZ range = max - min;
+    NTL::ZZ rand = NTL::RandomBnd(range);
+    return rand + min;
+}
+

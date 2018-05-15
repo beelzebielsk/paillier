@@ -38,4 +38,17 @@ NTL::ZZ generateCoprimeNumber(const NTL::ZZ& n);
  * keyLength, long : The length in bits of each key.
  */
 void GenPrimePair(NTL::ZZ& p, NTL::ZZ& q, long length);
+
+/* Returns a random number in [min, max).
+ *
+ * Parameters
+ * ==========
+ * min, NTL::ZZ : The inclusive minimum of the range.
+ * max, NTL::ZZ : The exclusive maximum of the range.
+ *
+ * Returns
+ * =======
+ * rand, NTL:ZZ : A random number in [min, max).
+ */
+NTL::ZZ RandomInRange(NTL::ZZ min, NTL::ZZ max);
 #endif
