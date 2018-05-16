@@ -11,6 +11,22 @@ class Value {
     /* The modulus with which the ciphertexts have been encrypted. 
      * For the paillier cryptosystem, that's n, not n ** 2. */
     static NTL::ZZ modulus;
+    /* Initialize the information for the current server. Call this
+     * before performing any computations with Memory or Input, to be
+     * safe.
+     * Any operator function between Memory and Input may use the
+     * information that this is supposed to initialize.
+     * Functions outside of this header file should not directly use
+     * this information, though it is not promised.
+     *
+     * Parameters
+     * ==========
+     * serverIdentity, bool : The identity of the server. False for
+     *      server 1, true for server 2. 
+     * modulus NTL::ZZ : The modulus of the paillier cryptosystem with
+     *      which all of the encryptions were performed. This modulus
+     *      should be the paillier n, not n ** 2.
+     */
     static void init(bool serverIdentity, NTL::ZZ modulus) {
         Value::serverIdentity = serverIdentity;
         Value::modulus = modulus;
