@@ -3,6 +3,8 @@
 
 #include <NTL/ZZ.h>
 #include <vector>
+#include <istream>
+#include <ostream>
 
 class Value {
     public:
@@ -58,6 +60,8 @@ class Input : public Value {
     Input operator+(Input& op);
     Input operator-();
     Input operator-(Input& op);
+    friend std::ostream& operator<<(std::ostream&, Input);
+    friend std::istream& operator>>(std::istream&, Input&);
     virtual void add(Value& destination, const Value& operand); 
     virtual void multiply(Value& destination, const Value& operand); 
 };
@@ -72,6 +76,8 @@ class Memory : public Value {
 
     Memory operator+(Memory& op);
     Memory(NTL::ZZ value, NTL::ZZ secret);
+    friend std::ostream& operator<<(std::ostream&, Memory);
+    friend std::istream& operator>>(std::istream&, Memory&);
     virtual void add(Value& destination, const Value& operand);
     virtual void multiply(Value& destination, const Value& operand); 
 };

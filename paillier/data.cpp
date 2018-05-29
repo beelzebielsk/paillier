@@ -232,3 +232,51 @@ std::pair<ZZ, ZZ> share(ZZ number, ZZ modulus) {
     NTL::ZZ share2 = number - share1;
     return std::pair<ZZ, ZZ>{share1, share2};
 }
+
+std::ostream& operator<<(std::ostream& s, Input i) {
+    s << "{ " << i.value << " " << i.modulus;
+    for (ZZ bit : i.bits) {
+        s << " " << bit;
+    }
+    return s << " }";
+}
+
+std::istream& operator>>(std::istream& s, Input& i) {
+    string delimiters;
+    ZZ value, modulus;
+    vector<ZZ> bits;
+
+    /* Read initial '{' */
+    s >> delimiters;
+    s >> value >> modulus;
+
+    ZZ currentBit;
+    while (s >> currentBit) bits.push_back(currentBit);
+    if (s.bad()) {
+        // Do something which reflects bad.
+        return s;
+    }
+    s.clear();
+    /* Read final '}' */
+    s >> delimiters;
+    if (delimiters != "}") {
+        s.clear(ios_base::failbit);
+        return s;
+    }
+    i = Input{value, bits, modulus};
+    return s;
+}
+
+std::ostream& operator<<(std::ostream& s, Memory m) {
+    return s << m.value << " " << m.secret;
+}
+
+std::istream& operator>>(std::istream& s, Memory& m) {
+    ZZ value, secret;
+    s >> value >> secret;
+    if (s.bad() || s.fail()) {
+        return s;
+    }
+    m = Memory{value, secret};
+    return s;
+}
