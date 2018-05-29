@@ -1,3 +1,6 @@
+#ifndef DDLOG_H
+#define DDLOG_H
+
 #include <iostream>
 #include <math.h>
 #include <algorithm>
@@ -26,3 +29,4 @@ namespace DDLog{
     string hexConverter(char hexValue);
     string hextoBinaryString(string hexString);
 }
+#endif
