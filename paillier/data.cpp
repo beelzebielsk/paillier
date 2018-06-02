@@ -39,7 +39,7 @@ Input Input::operator+(Input& op) {
     ZZ opMod = modulus * modulus;
     ZZ value = (this->value * op.value) % opMod;
     vector<ZZ> bits;
-    for (long i = 0; i < bits.size(); i++) {
+    for (long i = 0; i < this->bits.size(); i++) {
         bits.push_back((this->bits[i] * op.bits[i]) % opMod);
     }
     return Input(value, bits, modulus);
