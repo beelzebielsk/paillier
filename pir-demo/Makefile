@@ -16,6 +16,9 @@ pir_client : pir_client.cpp $(PAILLIER_SOURCES)
 pir_server : pir_server.cpp $(PAILLIER_SOURCES)
 	g++ -g $^ -o $@ $(INCLUDE_FLAGS) $(LIBFLAGS)
 
+pir : pir.cpp
+	g++ -g $^ -o $@
+
 
 .PHONY : all clean test
 test :
@@ -26,4 +29,4 @@ test :
 	echo $(TARGETS)
 	echo $(PAILLIER_SOURCES)
 clean :
-	rm $(TARGETS)
+	rm -f $(TARGETS) $(wildcard *.txt)
