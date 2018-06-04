@@ -3,15 +3,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <cstring>
-#include <cmath>
 #include <NTL/ZZ.h>
-#include <assert.h>
 #include <paillier/paillier.h>
 #include <paillier/data.h>
 #include <paillier/utility.h>
-#include <ctime>    // For time()
-#include <cstdlib>  // For srand() and rand()
 
 using namespace std;
 using namespace NTL;
@@ -23,8 +18,6 @@ bool is_file_exist(const char *fileName)
     return infile.good();
 }
 
-// share1, share lambda, input1, inputs
-// creating share1 and share lambda into input types with value 0s. bits = vector of 512 0s and modulus = 0
 void sendToServer(Memory mem, vector<Input> inputs, Paillier p,
                   const char *fileName)
 {
@@ -60,7 +53,6 @@ vector<Input> createInputs(vector<bool> index_binary, Paillier p)
 
 int main (int argc, char** argv) {
     
-    cout << "Hey." << endl;
     Paillier p = Paillier(512);
     ZZ index = (ZZ)4;
     vector<Input> inputs = createInputs(ZZToBits(index), p);
@@ -74,28 +66,31 @@ int main (int argc, char** argv) {
     sendToServer(mem2, inputs, p, "server2.txt");
     ZZ answer1, answer2;
 
-    /*
-    ifstream inFile("serveroutput.txt", 
-            std::ios_base::in | std::ios_base::app);
-    */
-    cin >> answer1 >> answer2;
-    /*
+    cout << "Client starts waiting on 1st server's file." << endl;
+    while(!is_file_exist("server1output.txt"));
+    cout << "Client finished waiting on 1st server's file." << endl;
+    ifstream inFile{"server1output.txt"};
+    cout << "Client starts waiting on 1st server's output." << endl;
     inFile.peek();
     while (inFile.eof()) {
         inFile.clear();
         inFile.peek();
     }
-    // The actual order of reading doesn't matter, because the client
-     * need only add the two shares together.
-     ///
+    cout << "Client finished waiting on 1st server's output." << endl;
     inFile >> answer1;
+
+    cout << "Client starts waiting on 2st server's file." << endl;
+    while(!is_file_exist("server2output.txt"));
+    cout << "Client finished waiting on 2st server's file." << endl;
+    inFile = ifstream{"server2output.txt"};
+    cout << "Client starts waiting on 2st server's output." << endl;
     inFile.peek();
     while (inFile.eof()) {
         inFile.clear();
         inFile.peek();
     }
+    cout << "Client finished waiting on 2st server's output." << endl;
     inFile >> answer2;
-    */
 
     cout << "Fin: answer is " << answer1 + answer2 << endl;
     

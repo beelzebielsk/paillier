@@ -2,8 +2,6 @@
 #include <math.h>
 #include <algorithm>
 #include <stdlib.h>
-#include <time.h>
-#include <assert.h>
 
 #include <iostream>
 #include <fstream>
@@ -24,17 +22,12 @@ int main(int argc, char ** args)
     int identity = atoi(args[1]);
     ZZ answer = execute_server(identity);
     ofstream o;
-    //o.open("serveroutput.txt");
-    o.open("serveroutput");
-    /*
     if (identity) {
         o.open("server2output.txt");
-        o.open("serveroutput.txt");
     } else {
         o.open("server1output.txt");
     }
-    */
-    o << answer << " ";
+    o << answer;
 
     return 0;
 }
@@ -104,7 +97,7 @@ ZZ execute_server(bool identity) {
             bool bit = (serverIndex >> i) & 1;
             //if (i == 0) {
                 //cout << (allInput[bit][i]) << endl;
-                cout << (allInput[bit][i].bits.size()) << endl;
+                //cout << (allInput[bit][i].bits.size()) << endl;
             //}
             result = result * allInput[bit][i];
         }
